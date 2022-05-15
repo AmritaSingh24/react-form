@@ -1,5 +1,5 @@
-import React from "react";
-import { useForm, Controller } from "react-hook-form";
+import React, { useEffect } from "react";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import "./registration.css";
@@ -19,17 +19,34 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import IconButton from "@mui/material/IconButton";
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 
 const Registration = () => {
   const validationSchema = Yup.object().shape({
     fullname: Yup.string().required("Fullname is required"),
     email: Yup.string().required("Email is required").email("Email is invalid"),
-    password: Yup.string()
-      .required("Password is required")
-      .min(2, "Password must be at least 6 characters")
-      .max(42, "Password must not exceed 40 characters"),
+    age: Yup.string().required("Age is required"),
+    mobile: Yup.string()
+      .required("Mobile Number is required")
+      .min(10, "Invalid number")
+      .max(10, "Invalid number"),
+    addresses: Yup.array().of(
+      Yup.object().shape({
+        addressline1: Yup.string()
+          .required("Address line1 is required")
+          .min(6, "Address line2 be at least 6 characters"),
+        addressline2: Yup.string()
+          .required("Address line2 is required")
+          .min(6, "Address line2 must be at least 6 characters"),
+        city: Yup.string().required("City is required"),
+        state: Yup.string().required("State is required"),
+        pincode: Yup.string()
+          .required("Pincode is required")
+          .min(6, "Invalid pincode")
+          .max(6, "Invalid pincode"),
+      })
+    ),
     acceptTerms: Yup.bool().oneOf(
       [true],
       "Accept Terms and conditions is required"
@@ -44,6 +61,29 @@ const Registration = () => {
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "addresses",
+  });
+
+  const numberofaddress = 1;
+
+  // useEffect(() => {
+  //   const newval = parseInt(numberofaddress || 0);
+  //   const oldval = fields.length;
+  //   if (newval > oldval) {
+  //     for (let i = oldval; i < newval; i++) {
+  //       append({
+  //         addressline1: "",
+  //         addressline2: "",
+  //         city: "",
+  //         state: "",
+  //         pincode: "",
+  //       });
+  //     }
+  //   }
+  // }, [numberofaddress]);
 
   const onSubmit = (data) => {
     console.log(JSON.stringify(data, null, 2));
@@ -74,7 +114,7 @@ const Registration = () => {
               {...register("fullname")}
               error={errors.fullname ? true : false}
             />
-            <Typography variant="inherit" color="textSecondary">
+            <Typography variant="inherit" color="error.main">
               {errors.fullname?.message}
             </Typography>
           </Grid>
@@ -89,23 +129,23 @@ const Registration = () => {
               {...register("email")}
               error={errors.email ? true : false}
             />
-            <Typography variant="inherit" color="textSecondary">
+            <Typography variant="inherit" color="error.main">
               {errors.email?.message}
             </Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
             <TextField
               required
-              id="email"
-              name="email"
-              label="Email"
+              id="age"
+              name="age"
+              label="Age"
               fullWidth
               margin="dense"
-              {...register("email")}
-              error={errors.email ? true : false}
+              {...register("age")}
+              error={errors.age ? true : false}
             />
-            <Typography variant="inherit" color="textSecondary">
-              {errors.email?.message}
+            <Typography variant="inherit" color="error.main">
+              {errors.age?.message}
             </Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -117,11 +157,11 @@ const Registration = () => {
               type="number"
               fullWidth
               margin="dense"
-              {...register("password")}
-              error={errors.password ? true : false}
+              {...register("mobile")}
+              error={errors.mobile ? true : false}
             />
-            <Typography variant="inherit" color="textSecondary">
-              {errors.password?.message}
+            <Typography variant="inherit" color="error.main">
+              {errors.mobile?.message}
             </Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -142,106 +182,133 @@ const Registration = () => {
                 <MenuItem value={30}>Full Stack Developer</MenuItem>
               </Select>
             </FormControl>
-            <Typography variant="inherit" color="textSecondary">
+            <Typography variant="inherit" color="error.main">
               {errors.confirmPassword?.message}
             </Typography>
           </Grid>
-          <Grid container sx={{ border: 1 }} py={2} marginY={2}>
-            <Grid
-              container
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                margin: "0 20px 20px 20px"
-              }}
-            >
-              <Typography>Address #1</Typography>
-              <Box>
-                <IconButton color="primary" sx={{ border: 1, margin:"0 10px" }} size="small"><AddIcon size="small"/></IconButton>
-                <IconButton color="primary" sx={{ border: 1 }} size="small"><RemoveIcon size="small"/></IconButton>
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={5.75} marginX={1.2}>
-              <TextField
-                required
-                id="mobile"
-                name="mobile"
-                label="Address line 1"
-                type="text"
-                fullWidth
-                margin="dense"
-                {...register("password")}
-                error={errors.password ? true : false}
-              />
-              <Typography variant="inherit" color="textSecondary">
-                {errors.password?.message}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={5.75} marginX={1}>
-              <TextField
-                required
-                id="mobile"
-                name="mobile"
-                label="Address line2"
-                type="text"
-                fullWidth
-                margin="dense"
-                {...register("password")}
-                error={errors.password ? true : false}
-              />
-              <Typography variant="inherit" color="textSecondary">
-                {errors.password?.message}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={3.8} marginX={1.3}>
-              <TextField
-                required
-                id="mobile"
-                name="mobile"
-                label="City"
-                type="text"
-                fullWidth
-                margin="dense"
-                {...register("password")}
-                error={errors.password ? true : false}
-              />
-              <Typography variant="inherit" color="textSecondary">
-                {errors.password?.message}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={3.8} marginX={0.4}>
-              <TextField
-                required
-                id="mobile"
-                name="mobile"
-                label="State"
-                type="text"
-                fullWidth
-                margin="dense"
-                {...register("password")}
-                error={errors.password ? true : false}
-              />
-              <Typography variant="inherit" color="textSecondary">
-                {errors.password?.message}
-              </Typography>
-            </Grid>
-            <Grid item sm={3.8} marginX={1}>
-              <TextField
-                required
-                id="mobile"
-                name="mobile"
-                label="Pincode"
-                type="number"
-                fullWidth
-                margin="dense"
-                {...register("password")}
-                error={errors.password ? true : false}
-              />
-              <Typography variant="inherit" color="textSecondary">
-                {errors.password?.message}
-              </Typography>
-            </Grid>
-          </Grid>
+          {fields.map((address, i) => {
+            return (
+              <Grid container sx={{ border: 1 }} py={2} marginY={2}>
+                <Grid
+                  container
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    margin: "0 20px 20px 20px",
+                  }}
+                >
+                  <Typography>Address #{i + 1}</Typography>
+                  <Box>
+                    <IconButton
+                      color="primary"
+                      sx={{ border: 1, margin: "0 10px" }}
+                      size="small"
+                      onClick={() =>
+                        append({
+                          addressline1: "",
+                          addressline2: "",
+                          city: "",
+                          state: "",
+                          pincode: "",
+                        })
+                      }
+                    >
+                      <AddIcon size="small" />
+                    </IconButton>
+                    <IconButton
+                      color="primary"
+                      sx={{ border: 1 }}
+                      size="small"
+                      onClick={() => remove(i)}
+                    >
+                      <RemoveIcon size="small" />
+                    </IconButton>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={5.75} marginX={1.2}>
+                  <TextField
+                    required
+                    id="addressline1"
+                    name={`addresses[${i}]addressline1`}
+                    label="Address line1"
+                    type="text"
+                    fullWidth
+                    margin="dense"
+                    {...register(`addresses.${i}.addressline1`)}
+                    error={errors.addresses?.[i]?.addressline1 ? true : false}
+                  />
+                  <Typography variant="inherit" color="error.main">
+                    {errors.addresses?.[i]?.addressline1?.message}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={5.75} marginX={1}>
+                  <TextField
+                    required
+                    id="addressline2"
+                    name={`addresses[${i}]addressline2`}
+                    label="address line2"
+                    type="text"
+                    fullWidth
+                    margin="dense"
+                    {...register(`addresses.${i}.addressline2`)}
+                    error={errors.addresses?.[i]?.addressline2 ? true : false}
+                  />
+                  <Typography variant="inherit" color="error.main">
+                    {errors.addresses?.[i]?.addressline2?.message}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={3.8} marginX={1.3}>
+                  <TextField
+                    required
+                    id="city"
+                    name={`addresses[${i}]city`}
+                    label="City"
+                    type="text"
+                    fullWidth
+                    margin="dense"
+                    {...register("city")}
+                    error={errors.addresses?.[i]?.city ? true : false}
+                  />
+                  <Typography variant="inherit" color="error.main">
+                    {errors.addresses?.[i]?.city?.message}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={3.8} marginX={0.4}>
+                  <TextField
+                    required
+                    id="state"
+                    name={`addresses[${i}]state`}
+                    label="State"
+                    type="text"
+                    fullWidth
+                    margin="dense"
+                    {...register("state")}
+                    error={errors.addresses?.[i]?.state ? true : false}
+                  />
+                  <Typography variant="inherit" color="error.main">
+                    {errors.addresses?.[i]?.state?.message}
+                  </Typography>
+                </Grid>
+                <Grid item sm={3.8} marginX={1}>
+                  <TextField
+                    required
+                    id="pincode"
+                    name={`addresses[${i}]pincode`}
+                    label="Pincode"
+                    type="number"
+                    fullWidth
+                    margin="dense"
+                    {...register("pincode")}
+                    error={errors.addresses?.[i]?.pincode ? true : false}
+                  />
+                  <Typography variant="inherit" color="error.main">
+                    {errors.addresses?.[i]?.pincode?.message}
+                  </Typography>
+                </Grid>
+              </Grid>
+            );
+          })}
+
           <Grid item xs={12}>
             <FormControlLabel
               control={
@@ -265,7 +332,7 @@ const Registration = () => {
               }
             />
             <br />
-            <Typography variant="inherit" color="textSecondary">
+            <Typography variant="inherit" color="error.main">
               {errors.acceptTerms ? "(" + errors.acceptTerms.message + ")" : ""}
             </Typography>
           </Grid>
