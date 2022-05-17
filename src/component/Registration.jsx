@@ -3,6 +3,7 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import "./registration.css";
+import ReCAPTCHA from "react-google-recaptcha";
 
 import {
   Paper,
@@ -51,6 +52,7 @@ const Registration = () => {
       [true],
       "Accept Terms and conditions is required"
     ),
+    acceptrecaptcha: Yup.bool().oneOf([true], "Recaptcha is required"),
   });
 
   const {
@@ -67,23 +69,21 @@ const Registration = () => {
     name: "addresses",
   });
 
-  const numberofaddress = 1;
+  const addressinput = {
+    addressline1: "",
+    addressline2: "",
+    city: "",
+    state: "",
+    pincode: "",
+  };
 
-  // useEffect(() => {
-  //   const newval = parseInt(numberofaddress || 0);
-  //   const oldval = fields.length;
-  //   if (newval > oldval) {
-  //     for (let i = oldval; i < newval; i++) {
-  //       append({
-  //         addressline1: "",
-  //         addressline2: "",
-  //         city: "",
-  //         state: "",
-  //         pincode: "",
-  //       });
-  //     }
-  //   }
-  // }, [numberofaddress]);
+  const handleAddclick = () => {
+    append(addressinput);    
+  }
+
+  const handleRemoveClick = (i) => {
+    remove(i)
+  } 
 
   const onSubmit = (data) => {
     console.log(JSON.stringify(data, null, 2));
@@ -94,6 +94,10 @@ const Registration = () => {
   const handleChange = (event) => {
     setAge(event.target.value);
   };
+
+  function onChange(value) {
+    console.log("Captcha value:", value);
+  }
 
   return (
     <Paper className="card">
@@ -186,6 +190,123 @@ const Registration = () => {
               {errors.confirmPassword?.message}
             </Typography>
           </Grid>
+          <Grid container sx={{ border: 1 }} py={2} marginY={2}>
+                <Grid
+                  container
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    margin: "0 20px 20px 20px",
+                  }}
+                >
+                  <Typography>Address #{1}</Typography>
+                  <Box>
+                    <IconButton
+                      color="primary"
+                      sx={{ border: 1, margin: "0 10px" }}
+                      size="small"
+                      onClick={() =>
+                        handleAddclick()
+                      }
+                    >
+                      <AddIcon size="small" />
+                    </IconButton>
+                    <IconButton
+                      color="primary"
+                      sx={{ border: 1 }}
+                      size="small"
+                      onClick={() => handleRemoveClick(1)}
+                    >
+                      <RemoveIcon size="small" />
+                    </IconButton>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={5.75} marginX={1.2}>
+                  <TextField
+                    required
+                    id="addressline1"
+                    name="addressline1"
+                    // name={`addresses[${i}]addressline1`}
+                    label="Address line1"
+                    type="text"
+                    fullWidth
+                    margin="dense"
+                    // {...register(`addresses.${i}.addressline1`)}
+                    // error={errors.addresses?.[i]?.addressline1 ? true : false}
+                  />
+                  {/* <Typography variant="inherit" color="error.main">
+                    {errors.addresses?.[i]?.addressline1?.message}
+                  </Typography> */}
+                </Grid>
+                <Grid item xs={12} sm={5.75} marginX={1}>
+                  <TextField
+                    required
+                    id="addressline2"
+                    name="addressline2"
+                    // name={`addresses[${i}]addressline2`}
+                    label="address line2"
+                    type="text"
+                    fullWidth
+                    margin="dense"
+                    // {...register(`addresses.${i}.addressline2`)}
+                    // error={errors.addresses?.[i]?.addressline2 ? true : false}
+                  />
+                  {/* <Typography variant="inherit" color="error.main">
+                    {errors.addresses?.[i]?.addressline2?.message}
+                  </Typography> */}
+                </Grid>
+                <Grid item xs={12} sm={3.8} marginX={1.3}>
+                  <TextField
+                    required
+                    id="city"
+                    name="city"
+                    // name={`addresses[${i}]city`}
+                    label="City"
+                    type="text"
+                    fullWidth
+                    margin="dense"
+                    // {...register("city")}
+                    // error={errors.addresses?.[i]?.city ? true : false}
+                  />
+                  {/* <Typography variant="inherit" color="error.main">
+                    {errors.addresses?.[i]?.city?.message}
+                  </Typography> */}
+                </Grid>
+                <Grid item xs={12} sm={3.8} marginX={0.4}>
+                  <TextField
+                    required
+                    id="state"
+                    name="state"
+                    // name={`addresses[${i}]state`}
+                    label="State"
+                    type="text"
+                    fullWidth
+                    margin="dense"
+                    // {...register("state")}
+                    // error={errors.addresses?.[i]?.state ? true : false}
+                  />
+                  {/* <Typography variant="inherit" color="error.main">
+                    {errors.addresses?.[i]?.state?.message}
+                  </Typography> */}
+                </Grid>
+                <Grid item sm={3.8} marginX={1}>
+                  <TextField
+                    required
+                    id="pincode"
+                    name="pincode"
+                    // name={`addresses[${i}]pincode`}
+                    label="Pincode"
+                    type="number"
+                    fullWidth
+                    margin="dense"
+                    // {...register("pincode")}
+                    // error={errors.addresses?.[i]?.pincode ? true : false}
+                  />
+                  {/* <Typography variant="inherit" color="error.main">
+                    {errors.addresses?.[i]?.pincode?.message}
+                  </Typography> */}
+                </Grid>
+              </Grid>
           {fields.map((address, i) => {
             return (
               <Grid container sx={{ border: 1 }} py={2} marginY={2}>
@@ -336,6 +457,36 @@ const Registration = () => {
               {errors.acceptTerms ? "(" + errors.acceptTerms.message + ")" : ""}
             </Typography>
           </Grid>
+          {/* <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Controller
+                  control={control}
+                  name="acceptrecaptcha"
+                  defaultValue="false"
+                  inputRef={register()}
+                  render={({ field: { onChange } }) => (
+                    <ReCAPTCHA sitekey="6LegnfUfAAAAAMiv6z4diBsguAflCFKC9ObXriqO" color="primary"
+                    onChange={(e) => onChange(e.target.checked)} />
+
+                  )}
+                />
+              }
+              label={
+                <Typography color={errors.acceptrecaptcha ? "error" : "inherit"}>
+                  I agree terms and conditions*
+                </Typography>
+              }
+            />
+            <br />
+            <Typography variant="inherit" color="error.main">
+              {errors.acceptrecaptcha ? "(" + errors.acceptrecaptcha.message + ")" : ""}
+            </Typography>
+          </Grid> */}
+          <ReCAPTCHA
+            sitekey="6LfxSdAdAAAAAM8vW3t2kvpQDoX2srJKjQuonBpf"
+            onChange={onChange}
+          />
         </Grid>
 
         <Box mt={3}>
